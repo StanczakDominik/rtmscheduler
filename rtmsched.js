@@ -186,7 +186,7 @@ function createScheduledTask(listid, taskitem, instance){
     rtmtags         : taskitem.tags,
     rtmtaskurl      : taskitem.url,
     rtmtaskpriority : instance.priority,
-    rtmtaskestimate : taskitem.estimate 
+    rtmtaskestimate : instance.estimate 
   };
   $('#rtmcalendar').fullCalendar('renderEvent', eventObject, true);
 }
@@ -205,7 +205,8 @@ function createUnscheduledTask(listid, taskitem, instance){
           rtmlistid       : listid,
           rtmtags         : taskitem.tags,
           rtmtaskurl      : taskitem.url,
-          rtmtaskpriority : instance.priority  } }
+          rtmtaskpriority : instance.priority,
+          rtmtaskestimate : instance.estimate  } }
   }).draggable({
     start:  function() { $(this).toggle(); }, 
     stop: function() { $(this).toggle(); }, 
@@ -361,8 +362,9 @@ function editTaskMetadata(datatype, newvalue, data){
         apiname = "rtm.tasks.setTags";
         break;
       case "estimate":
-        data.calData.rtmtaskestimate = newestimate;
+        data.calData.rtmtaskestimate = newvalue;
         apiname = "rtm.tasks.setEstimate";
+	break;
     }
 
     rtm.get(apiname, apipayload, 
@@ -473,7 +475,7 @@ function handleTask(listid, taskitem, instance, ignoreunscheduled){
 // displays and populates the dialog for editing RTM tasks
 // 
 function displayEditTask(dlgData){
-  $("#edittaskdialog").dialog({ width : 490, height: 260, title: dlgData.calData.title }).data(dlgData);
+  $("#edittaskdialog").dialog({ width : 490, height: 350, title: dlgData.calData.title }).data(dlgData);
   $("#edittasktext").val(dlgData.calData.title);
   $("#edittasklist").val(dlgData.calData.rtmlistid);
   $("#edittaskurl").val(dlgData.calData.rtmtaskurl);
@@ -597,7 +599,7 @@ $(document).ready(function() {
       .pipe(function() { return editTaskMetadata("priority", newpriority, data); })
       .pipe(function() { return editTaskMetadata("url",      newurl,      data); })
       .pipe(function() { return editTaskMetadata("tags",     newtags,     data); })
-      .pipe(function() { return editTaskMetadata("estimate", newestimate,      data); })
+      .pipe(function() { return editTaskMetadata("estimate", newestimate, data); })
       .done(function() 
       {
         $('#edittaskbtn').button("enable");
@@ -637,8 +639,9 @@ $(document).ready(function() {
             task : { id : _taskBeingDragged.event.rtmtaskid },
             tags : _taskBeingDragged.event.rtmtags,
             url  : _taskBeingDragged.event.rtmtaskurl,
-	    estimate : _taskBeingDragged.event.rtmtaskestimate,
-        }, { priority : _taskBeingDragged.event.rtmtaskpriority });
+        }, { priority : _taskBeingDragged.event.rtmtaskpriority,
+	     estimate : _taskBeingDragged.event.rtmtaskestimate
+	});
       }
     }
   });
