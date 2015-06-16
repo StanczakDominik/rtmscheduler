@@ -185,7 +185,8 @@ function createScheduledTask(listid, taskitem, instance){
     rtmlistid       : listid,
     rtmtags         : taskitem.tags,
     rtmtaskurl      : taskitem.url,
-    rtmtaskpriority : instance.priority 
+    rtmtaskpriority : instance.priority,
+    rtmtaskestimate : taskitem.estimate 
   };
   $('#rtmcalendar').fullCalendar('renderEvent', eventObject, true);
 }
@@ -330,7 +331,8 @@ function editTaskMetadata(datatype, newvalue, data){
   
   if ((datatype === "priority" && data.calData.rtmtaskpriority === newvalue) ||
       (datatype === "url" && data.calData.rtmtaskurl === newvalue) ||
-      (datatype === "tags" && flattenTags(data.calData.rtmtags) === newvalue))
+      (datatype === "tags" && flattenTags(data.calData.rtmtags) === newvalue) ||
+      (datatype === "estimate" && data.calData.rtmtaskestimate === newvalue))
   {
     deferred.resolve();
   }
@@ -358,6 +360,9 @@ function editTaskMetadata(datatype, newvalue, data){
         data.calData.rtmtags = newvalue;
         apiname = "rtm.tasks.setTags";
         break;
+      case "estimate":
+        data.calData.rtmtaskestimate = newestimate;
+        apiname = "rtm.tasks.setEstimate";
     }
 
     rtm.get(apiname, apipayload, 
@@ -474,6 +479,7 @@ function displayEditTask(dlgData){
   $("#edittaskurl").val(dlgData.calData.rtmtaskurl);
   $("#edittaskpriority").val(dlgData.calData.rtmtaskpriority);
   $("#edittasktags").val(flattenTags(dlgData.calData.rtmtags));
+  $("#edittaskestimate").val(dlgData.calData.rtmtaskestimate);
 }
 
 // RTM API returns tags in different forms based on whether there is none, one or several
@@ -584,12 +590,14 @@ $(document).ready(function() {
     var newurl = $('#edittaskurl').val();
     var newtags = $('#edittasktags').val();
     var newlist = $('#edittasklist').val();
+    var newestimate = $('#edittaskestimate').val();
 
     editTaskList(newlist, data)
       .pipe(function() { return editTaskTitle(newtitle, data); })
       .pipe(function() { return editTaskMetadata("priority", newpriority, data); })
       .pipe(function() { return editTaskMetadata("url",      newurl,      data); })
       .pipe(function() { return editTaskMetadata("tags",     newtags,     data); })
+      .pipe(function() { return editTaskMetadata("estimate", newestimate,      data); })
       .done(function() 
       {
         $('#edittaskbtn').button("enable");
@@ -628,7 +636,8 @@ $(document).ready(function() {
             name : _taskBeingDragged.event.title,
             task : { id : _taskBeingDragged.event.rtmtaskid },
             tags : _taskBeingDragged.event.rtmtags,
-            url  : _taskBeingDragged.event.rtmtaskurl
+            url  : _taskBeingDragged.event.rtmtaskurl,
+	    estimate : _taskBeingDragged.event.rtmtaskestimate,
         }, { priority : _taskBeingDragged.event.rtmtaskpriority });
       }
     }
